@@ -1,0 +1,7 @@
+.ipynb_checkpoints
+.direnv
+.venv
+data
+mrd_data
+testdata.h5
+testdata_out.h5

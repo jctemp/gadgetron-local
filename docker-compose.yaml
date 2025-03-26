@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  mir:
+    image: ghcr.io/gadgetron/gadgetron/gadgetron_ubuntu_rt_cuda:latest
+    command: gadgetron --storage_address http://db:27002 --port 27001
+    ports:
+      - "27001:27001"
+    depends_on:
+      - db
+    devices:
+      - nvidia.com/gpu=all
+    restart: on-failure
+  db:
+    image: ghcr.io/ismrmrd/mrd-storage-server:v0.0.12
+    ports:
+      - "27002:27002"
+    environment:
+      - MRD_STORAGE_SERVER_DATABASE_PROVIDER=sqlite
+      - MRD_STORAGE_SERVER_DATABASE_CONNECTION_STRING=/data/metadata.db
+      - MRD_STORAGE_SERVER_STORAGE_PROVIDER=filesystem
+      - MRD_STORAGE_SERVER_STORAGE_CONNECTION_STRING=/data/blobs
+      - MRD_STORAGE_SERVER_PORT=27002
+      - MRD_STORAGE_SERVER_LOG_REQUESTS=true
+    volumes:
+      - ./mrd_data:/data
+    depends_on:
+      - init
+    restart: on-failure
+  init:
+    build:
+      context: .
+      dockerfile: init.Dockerfile
+    volumes:
+      - ./mrd_data:/data
